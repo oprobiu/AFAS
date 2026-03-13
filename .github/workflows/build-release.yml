@@ -1,0 +1,48 @@
+name: Build and Release .apkg
+
+on:
+  workflow_call:
+    inputs:
+      deck-config:
+        required: false
+        type: string
+        default: 'data/deck.json'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout dataset repo
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.x' }
+
+      - name: Checkout AFAS tools
+        uses: actions/checkout@v4
+        with:
+          repository: oprobiu/AFAS
+          ref: ${{ github.workflow_sha }}
+          path: .tools/AFAS
+
+      - name: Install dependencies
+        run: pip install -r .tools/AFAS/requirements.txt
+
+      - name: Validate dataset
+        run: python3 .tools/AFAS/scripts/validate.py --config ${{ inputs.deck-config }} --tools-dir .tools/AFAS
+
+      - name: Build .apkg
+        run: python3 .tools/AFAS/scripts/build_apkg.py --config ${{ inputs.deck-config }} --tools-dir .tools/AFAS
+
+      - name: Determine artifact name
+        id: name
+        run: |
+          DECK=$(python3 -c "import json; print(json.load(open('${{ inputs.deck-config }}'))['deck_name'].replace(' ','_'))")
+          echo "artifact=${DECK}.apkg" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/${{ steps.name.outputs.artifact }}
