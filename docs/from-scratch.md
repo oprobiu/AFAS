@@ -79,12 +79,30 @@ python3 scripts/list_voices.py --language fr
 python3 scripts/list_voices.py                  # all languages
 ```
 
-Add a `tts` block to deck.json at the top level, next to `deck_name`:
+Add a `tts` block to deck.json at the top level, next to `deck_name`. Two engines are supported:
+
+**edge-tts** (multiple voices):
 ```json
 "tts": {
   "engine": "edge-tts",
   "language": "it-IT",
   "voices": ["it-IT-ElsaNeural", "it-IT-DiegoNeural"],
+  "targets": [
+    {
+      "field": "audio",
+      "source": "front",
+      "prefix": "word"
+    }
+  ]
+}
+```
+
+**gtts** (Google Translate TTS, single voice):
+```json
+"tts": {
+  "engine": "gtts",
+  "language": "it",
+  "voices": [],
   "targets": [
     {
       "field": "audio",

@@ -20,7 +20,7 @@ Pick one:
 | `unpack_apkg.py` | .apkg to CSV + media + deck.json |
 | `build_apkg.py` | CSV + media to .apkg |
 | `validate.py` | Check CSV, audio refs, config. Use `--clean-orphans` to delete unused media |
-| `regenerate_tts.py` | Generate edge-tts audio for any language. Use `--dry-run` to preview |
+| `regenerate_tts.py` | Generate TTS audio (edge-tts or gTTS) for any language. Use `--dry-run` to preview |
 | `list_voices.py` | List available TTS voices. Use `--language <code>` to filter |
 
 ### deck.json
@@ -36,7 +36,7 @@ Pick one:
 | `templates` | no | `[{name, front, back}, ...]` You define your own, or omit to get defaults |
 | `css` | no | Card styling string. Default is 20px Arial, centered, blue replay button |
 | `template_files` | no | `{css: "path", templates: "path"}` to load from files instead of inline |
-| `tts` | no | TTS config. Skip for decks without audio |
+| `tts` | no | TTS config. Skip for decks without audio. Supported engines: `edge-tts` (multiple voices, free) and `gtts` (Google Translate TTS, single voice, free) |
 
 ### TTS targets
 

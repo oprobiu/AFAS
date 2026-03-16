@@ -54,7 +54,9 @@ Add an audio field to the `fields` array and reference it in your template:
 ]
 ```
 
-Then add the `tts` block at the top level of deck.json, next to `deck_name`. Pick voices from:
+Then add the `tts` block at the top level of deck.json, next to `deck_name`. Two engines are supported:
+
+**edge-tts** (multiple voices, Microsoft neural TTS):
 ```bash
 python3 scripts/list_voices.py --language it    # or de, fr, ja, zh, etc.
 ```
@@ -64,6 +66,23 @@ python3 scripts/list_voices.py --language it    # or de, fr, ja, zh, etc.
   "engine": "edge-tts",
   "language": "it-IT",
   "voices": ["it-IT-ElsaNeural", "it-IT-DiegoNeural"],
+  "targets": [
+    {
+      "field": "audio",
+      "source": "front",
+      "prefix": "word",
+      "strip_html": true
+    }
+  ]
+}
+```
+
+**gtts** (Google Translate TTS, single voice, simpler):
+```json
+"tts": {
+  "engine": "gtts",
+  "language": "it",
+  "voices": [],
   "targets": [
     {
       "field": "audio",

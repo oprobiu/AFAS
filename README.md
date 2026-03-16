@@ -31,7 +31,7 @@ Full walkthrough in **[GUIDE.md](GUIDE.md)**.
 | `unpack_apkg.py` | .apkg to CSV + media + deck.json |
 | `build_apkg.py` | CSV + media to .apkg |
 | `validate.py` | Checks CSV, audio refs, config |
-| `regenerate_tts.py` | Generates edge-tts audio for any language |
+| `regenerate_tts.py` | Generates TTS audio (edge-tts or gTTS) for any language |
 | `list_voices.py` | Lists available TTS voices |
 
 ## CI for dataset repos
@@ -45,7 +45,9 @@ on:
     tags: ['v*']
 jobs:
   build:
-    uses: oprobiu/AFAS/.github/workflows/build-release.yml@v1.0.0
+    uses: oprobiu/AFAS/.github/workflows/build-release.yml@v0.0.3
+    with:
+      tools-version: v0.0.3
     permissions:
       contents: write
 ```
