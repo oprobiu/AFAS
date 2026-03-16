@@ -22,6 +22,7 @@ Pick one:
 | `validate.py` | Check CSV, audio refs, config. Use `--clean-orphans` to delete unused media |
 | `regenerate_tts.py` | Generate TTS audio (edge-tts or gTTS) for any language. Use `--dry-run` to preview |
 | `format_verbs.py` | Fetch Präteritum forms via API and format German verbs. Use `--dry-run` to preview |
+| `translate_deck.py` | Auto-translate columns via Google Translate with manual review. Use `--dry-run` to preview |
 | `list_voices.py` | List available edge-tts voices. Use `--language <code>` to filter |
 
 ### deck.json

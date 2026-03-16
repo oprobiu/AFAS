@@ -33,6 +33,7 @@ Full walkthrough in **[GUIDE.md](GUIDE.md)**.
 | `validate.py` | Checks CSV, audio refs, config |
 | `regenerate_tts.py` | Generates TTS audio (edge-tts or gTTS) for any language |
 | `format_verbs.py` | Fetches Präteritum forms and formats German verbs (infinitiv, Präteritum, Partizip) |
+| `translate_deck.py` | Auto-translate columns via Google Translate, with manual review for flagged items |
 | `list_voices.py` | Lists available edge-tts voices |
 
 ## CI for dataset repos
