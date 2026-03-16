@@ -32,7 +32,8 @@ Full walkthrough in **[GUIDE.md](GUIDE.md)**.
 | `build_apkg.py` | CSV + media to .apkg |
 | `validate.py` | Checks CSV, audio refs, config |
 | `regenerate_tts.py` | Generates TTS audio (edge-tts or gTTS) for any language |
-| `list_voices.py` | Lists available TTS voices |
+| `format_verbs.py` | Fetches Präteritum forms and formats German verbs (infinitiv, Präteritum, Partizip) |
+| `list_voices.py` | Lists available edge-tts voices |
 
 ## CI for dataset repos
 

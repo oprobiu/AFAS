@@ -158,11 +158,10 @@ async def process_target(target, notes, voices, media_dir, args, engine="edge-tt
 
         if os.path.exists(path):
             skip += 1
-            print(f"\r  [{i+1}/{total}] Skipped (exists): {skip}", end="", flush=True)
         else:
             label = "DIALOGUE" if is_dlg else (voice.split("-")[-1] if engine == "edge-tts" else "gTTS")
             display = text[:55] + ("..." if len(text) > 55 else "")
-            print(f"\r  [{i+1}/{total}] {label}: {display:<60}", end="", flush=True)
+            print(f"  [{i+1}/{total}] {label}: {display}", flush=True)
             if not args.dry_run:
                 if is_dlg:
                     await generate_dialogue(text, dialogue_cfg, voices, path, engine, language)

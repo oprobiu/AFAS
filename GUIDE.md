@@ -21,7 +21,8 @@ Pick one:
 | `build_apkg.py` | CSV + media to .apkg |
 | `validate.py` | Check CSV, audio refs, config. Use `--clean-orphans` to delete unused media |
 | `regenerate_tts.py` | Generate TTS audio (edge-tts or gTTS) for any language. Use `--dry-run` to preview |
-| `list_voices.py` | List available TTS voices. Use `--language <code>` to filter |
+| `format_verbs.py` | Fetch Präteritum forms via API and format German verbs. Use `--dry-run` to preview |
+| `list_voices.py` | List available edge-tts voices. Use `--language <code>` to filter |
 
 ### deck.json
 
