@@ -7,6 +7,9 @@ on:
         required: false
         type: string
         default: 'data/deck.json'
+      tools-version:
+        required: true
+        type: string
 
 jobs:
   release:
@@ -24,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: oprobiu/AFAS
-          ref: ${{ github.workflow_sha }}
+          ref: ${{ inputs.tools-version }}
           path: .tools/AFAS
 
       - name: Install dependencies
