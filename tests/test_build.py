@@ -42,11 +42,11 @@ def make_test_dataset(tmpdir, custom_fields=None, custom_templates=None, tts=Non
         writer = csv.DictWriter(f, fieldnames=csv_cols)
         writer.writeheader()
         row = {c: "" for c in csv_cols}
-        row[csv_cols[0]] = "1"
-        if "de_word" in row:
-            row["de_word"] = "der Test"
-        if "ro_word" in row:
-            row["ro_word"] = "test"
+        row[csv_cols[0]] = "test_word"
+        if "fo_word" in row:
+            row["fo_word"] = "der Test"
+        if "na_word" in row:
+            row["na_word"] = "test"
         row["tags"] = "NOUN"
         writer.writerow(row)
 

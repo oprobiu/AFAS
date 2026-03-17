@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Fetch Präteritum forms for German verbs and format wort_de to match DAF1 style.
+Fetch Präteritum forms for German verbs and format fo_word with conjugation info.
 
-Reads verbs from notes.csv (identified by non-empty 'verbformen' column),
+Reads verbs from notes.csv (identified by non-empty 'verbformen' column or --conjugation-field),
 queries the german-verbs-api for Präteritum 3rd person singular,
-and formats wort_de as: infinitiv, <b>Präteritum</b>, hat/ist <b>Partizip</b>
+and formats fo_word as: infinitiv, <b>Präteritum</b>, hat/ist <b>Partizip</b>
 
 For regular (weak) verbs, no bolding is applied.
 
@@ -134,6 +134,8 @@ def format_verb(wort_de, prateritum, verbformen, infinitive):
 def main():
     parser = argparse.ArgumentParser(description="Fetch Präteritum and format verbs")
     parser.add_argument("--config", required=True, help="Path to deck.json")
+    parser.add_argument("--word-field", default="fo_word", help="CSV column for the word (default: fo_word)")
+    parser.add_argument("--conjugation-field", default="verbformen", help="CSV column for conjugation data (default: verbformen)")
     parser.add_argument("--dry-run", action="store_true", help="Preview without writing")
     parser.add_argument("--write-csv", action="store_true", help="Write changes to CSV")
     args = parser.parse_args()
@@ -147,21 +149,26 @@ def main():
         fields = reader.fieldnames
         rows = list(reader)
 
-    verbs = [(i, r) for i, r in enumerate(rows) if r.get('verbformen', '').strip()]
+    word_field = args.word_field
+    conj_field = args.conjugation_field
+
+    verbs = [(i, r) for i, r in enumerate(rows) if r.get(conj_field, '').strip()]
     print(f"\n=== Format Verbs ===\n")
     print(f"  Notes:  {len(rows)}")
     print(f"  Verbs:  {len(verbs)}")
+    print(f"  Word:   {word_field}")
+    print(f"  Conj:   {conj_field}")
     if args.dry_run:
         print(f"  Mode:   DRY RUN")
     print()
 
     fetched = skipped = failed = 0
     for idx, (i, row) in enumerate(verbs):
-        infinitive = extract_infinitive(row['wort_de'])
-        verbformen = row['verbformen'].strip()
+        infinitive = extract_infinitive(row[word_field])
+        verbformen = row[conj_field].strip()
 
         # Skip if already formatted (has <b> tags)
-        if '<b>' in row['wort_de']:
+        if '<b>' in row[word_field]:
             skipped += 1
             continue
 
@@ -172,12 +179,12 @@ def main():
             continue
 
         prat = fix_separable(prat, infinitive, verbformen)
-        formatted = format_verb(row['wort_de'], prat, verbformen, infinitive)
+        formatted = format_verb(row[word_field], prat, verbformen, infinitive)
 
         print(f"  [{idx+1}/{len(verbs)}] {infinitive}: {re.sub(r'<[^>]+>', '', formatted)}", flush=True)
 
         if not args.dry_run:
-            rows[i]['wort_de'] = formatted
+            rows[i][word_field] = formatted
         fetched += 1
 
     print(f"\n  Fetched: {fetched}  Skipped: {skipped}  Failed: {failed}\n")

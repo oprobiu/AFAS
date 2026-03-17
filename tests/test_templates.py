@@ -20,6 +20,10 @@ def test_css_has_replay_button():
     assert ".replay-button" in DEFAULT_CSS
 
 
+def test_css_has_sent_sep():
+    assert "hr.sent-sep" in DEFAULT_CSS
+
+
 def test_colors_are_hex():
     for color in [COLOR_DER, COLOR_DIE, COLOR_DAS]:
         assert color.startswith("#")
@@ -39,18 +43,25 @@ def test_templates_have_required_keys():
 
 def test_templates_reference_fields():
     all_text = "".join(t["front"] + t["back"] for t in DEFAULT_TEMPLATES)
-    for field in ["de_word", "de_sentence", "ro_word", "de_audio", "de_word_audio"]:
+    for field in ["fo_word", "fo_sentence", "na_word", "fo_word_audio"]:
         assert f"{{{{{field}}}}}" in all_text, f"Field {field} not in templates"
 
 
 def test_default_fields_count():
-    assert len(DEFAULT_FIELDS) == 8
+    assert len(DEFAULT_FIELDS) == 7
 
 
 def test_default_fields_have_name_and_csv():
     for f in DEFAULT_FIELDS:
         assert "name" in f
         assert "csv" in f
+
+
+def test_default_fields_use_fo_na():
+    csvs = [f["csv"] for f in DEFAULT_FIELDS]
+    assert "fo_word" in csvs
+    assert "na_word" in csvs
+    assert "fo_word_audio" in csvs
 
 
 def test_csv_columns_include_tags():

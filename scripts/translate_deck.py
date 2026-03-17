@@ -11,7 +11,7 @@ special characters suggesting ambiguity.
 Usage:
   python3 translate_deck.py --config data/deck.json \
     --source-lang de --target-lang ro \
-    --columns wort_de:wort_ro satz1_de:satz1_ro \
+    --columns fo_word:na_word fo_sentence:na_sentence \
     [--dry-run] [--write-csv]
 
 Requires: pip install deep-translator
@@ -78,8 +78,8 @@ def translate_batch(texts, source_lang, target_lang):
         flag = should_flag(clean, translated, source_lang, target_lang)
         results.append((translated or '', flag))
 
-        if (i + 1) % 50 == 0:
-            print(f"    [{i+1}/{len(texts)}] translated...", flush=True)
+        status = "⚠ FLAGGED" if flag else "✓"
+        print(f"  [{i+1}/{len(texts)}] {status}: {clean[:40]} → {(translated or '???')[:40]}", flush=True)
 
     return results
 

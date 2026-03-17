@@ -1,17 +1,17 @@
 """Default Anki card field definitions.
 
 These are used as fallback when deck.json does not specify fields.
+fo_ = foreign language, na_ = native language.
 """
 
 DEFAULT_FIELDS = [
-    {"name": "Note ID", "csv": "note_id"},
-    {"name": "de_word", "csv": "de_word"},
-    {"name": "de_sentence", "csv": "de_sentence"},
-    {"name": "ro_word", "csv": "ro_word"},
-    {"name": "ro_sentence", "csv": "ro_sentence"},
-    {"name": "ro_note", "csv": "ro_note"},
-    {"name": "de_audio", "csv": "de_audio"},
-    {"name": "de_word_audio", "csv": "de_word_audio"},
+    {"name": "fo_word", "csv": "fo_word"},
+    {"name": "fo_sentence", "csv": "fo_sentence"},
+    {"name": "na_word", "csv": "na_word"},
+    {"name": "na_sentence", "csv": "na_sentence"},
+    {"name": "na_note", "csv": "na_note"},
+    {"name": "fo_sentence_audio", "csv": "fo_sentence_audio"},
+    {"name": "fo_word_audio", "csv": "fo_word_audio"},
 ]
 
 # CSV column order (includes tags which is not an Anki field)

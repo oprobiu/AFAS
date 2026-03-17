@@ -32,7 +32,7 @@ MyDataset/
 
 It has the deck ID, notetype ID, field names, and card templates from your .apkg. Make sure it looks right.
 
-Field names come from the Anki notetype. They can be anything: `word`, `front`, `de_word`, whatever. The scripts just need CSV columns to match what deck.json says.
+Field names come from the Anki notetype. They can be anything: `word`, `front`, `fo_word`, whatever. The scripts just need CSV columns to match what deck.json says.
 
 ## 3. (Optional) Add TTS audio
 

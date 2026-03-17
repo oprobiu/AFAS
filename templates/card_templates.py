@@ -5,13 +5,13 @@ Used as fallback when deck.json does not specify templates.
 
 DEFAULT_TEMPLATES = [
     {
-        "name": "DE→RO",
-        "front": "{{de_word}} {{de_word_audio}}\n{{#de_sentence}}\n<br><br>\n<i>{{de_sentence}}</i>\n{{/de_sentence}}\n{{de_audio}}",
-        "back": "{{FrontSide}}\n\n<hr id=answer>\n\n{{ro_word}}\n{{#ro_sentence}}\n<br><br>\n<i>{{ro_sentence}}</i>\n{{/ro_sentence}}\n{{#ro_note}}\n<br><br>\n<small>{{ro_note}}</small>\n{{/ro_note}}",
+        "name": "FO→NA",
+        "front": "{{fo_word}} {{fo_word_audio}}\n{{#fo_sentence}}\n<br><br>\n<i>{{fo_sentence}}</i>\n{{/fo_sentence}}",
+        "back": "{{FrontSide}}\n\n<hr id=answer>\n\n{{na_word}}\n{{#na_sentence}}\n<br><br>\n<i>{{na_sentence}}</i>\n{{/na_sentence}}\n{{#na_note}}\n<br><br>\n<small>{{na_note}}</small>\n{{/na_note}}",
     },
     {
-        "name": "RO→DE",
-        "front": "{{ro_word}}\n{{#ro_sentence}}\n<br><br>\n<i>{{ro_sentence}}</i>\n{{/ro_sentence}}\n{{#ro_note}}\n<br><br>\n<small>{{ro_note}}</small>\n{{/ro_note}}",
-        "back": "{{FrontSide}}\n\n<hr id=answer>\n\n{{de_word}} {{de_word_audio}}\n{{#de_sentence}}\n<br><br>\n<i>{{de_sentence}}</i>\n{{/de_sentence}}\n{{de_audio}}",
+        "name": "NA→FO",
+        "front": "{{na_word}}\n{{#na_sentence}}\n<br><br>\n<i>{{na_sentence}}</i>\n{{/na_sentence}}\n{{#na_note}}\n<br><br>\n<small>{{na_note}}</small>\n{{/na_note}}",
+        "back": "{{FrontSide}}\n\n<hr id=answer>\n\n{{fo_word}} {{fo_word_audio}}\n{{#fo_sentence}}\n<br><br>\n<i>{{fo_sentence}}</i>\n{{/fo_sentence}}",
     },
 ]

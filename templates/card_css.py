@@ -20,6 +20,12 @@ DEFAULT_CSS = """.card {
 .replay-button svg path {
  fill: white;
 }
+hr.sent-sep {
+ border: none;
+ border-top: 1px dashed #ccc;
+ width: 60%;
+ margin: 4px auto;
+}
 """
 
 # Noun article colors

@@ -34,21 +34,24 @@ def init_dataset(output_dir):
         "tools_repo": "oprobiu/AFAS",
         "tools_version": "v1.0.0",
         "fields": [
-            {"name": "ID", "csv": "id", "_comment": "unique number per card"},
-            {"name": "Front", "csv": "front", "_comment": "word or phrase in target language"},
-            {"name": "Back", "csv": "back", "_comment": "translation"},
-            {"name": "Audio", "csv": "audio", "_comment": "leave empty -- TTS fills this in"},
+            {"name": "fo_word", "csv": "fo_word", "_comment": "word or phrase in foreign language"},
+            {"name": "fo_sentence", "csv": "fo_sentence", "_comment": "example sentence"},
+            {"name": "na_word", "csv": "na_word", "_comment": "translation in native language"},
+            {"name": "na_sentence", "csv": "na_sentence", "_comment": "translated sentence"},
+            {"name": "na_note", "csv": "na_note", "_comment": "optional note"},
+            {"name": "fo_sentence_audio", "csv": "fo_sentence_audio", "_comment": "leave empty -- TTS fills this in"},
+            {"name": "fo_word_audio", "csv": "fo_word_audio", "_comment": "leave empty -- TTS fills this in"},
         ],
         "templates": [
             {
-                "name": "Forward",
-                "front": "{{Front}} {{Audio}}",
-                "back": "{{FrontSide}}\n<hr id=answer>\n{{Back}}",
+                "name": "FO→NA",
+                "front": "{{fo_word}} {{fo_word_audio}}\n{{#fo_sentence}}\n<br><br>\n<i>{{fo_sentence}}</i>\n{{/fo_sentence}}",
+                "back": "{{FrontSide}}\n<hr id=answer>\n{{na_word}}\n{{#na_sentence}}\n<br><br>\n<i>{{na_sentence}}</i>\n{{/na_sentence}}",
             },
             {
-                "name": "Reverse",
-                "front": "{{Back}}",
-                "back": "{{FrontSide}}\n<hr id=answer>\n{{Front}} {{Audio}}",
+                "name": "NA→FO",
+                "front": "{{na_word}}\n{{#na_sentence}}\n<br><br>\n<i>{{na_sentence}}</i>\n{{/na_sentence}}",
+                "back": "{{FrontSide}}\n<hr id=answer>\n{{fo_word}} {{fo_word_audio}}\n{{#fo_sentence}}\n<br><br>\n<i>{{fo_sentence}}</i>\n{{/fo_sentence}}",
             },
         ],
         "_tts_comment": "Uncomment and edit the tts block below to enable audio generation. Run: python3 scripts/list_voices.py --language <code> to find voices.",
@@ -58,8 +61,8 @@ def init_dataset(output_dir):
             "voices": ["CHANGE-ME-Voice1", "CHANGE-ME-Voice2"],
             "targets": [
                 {
-                    "field": "audio",
-                    "source": "front",
+                    "field": "fo_word_audio",
+                    "source": "fo_word",
                     "prefix": "word",
                     "strip_html": True,
                 }
@@ -74,11 +77,11 @@ def init_dataset(output_dir):
     # --- notes.csv ---
     notes_path = os.path.join(data_dir, "notes.csv")
     with open(notes_path, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["id", "front", "back", "audio", "tags"], lineterminator="\n")
+        writer = csv.DictWriter(f, fieldnames=["fo_word", "fo_sentence", "na_word", "na_sentence", "na_note", "fo_sentence_audio", "fo_word_audio", "tags"], lineterminator="\n")
         writer.writeheader()
-        writer.writerow({"id": "1", "front": "hello", "back": "ciao", "audio": "", "tags": "GREETING"})
-        writer.writerow({"id": "2", "front": "cat", "back": "gatto", "audio": "", "tags": "NOUN"})
-        writer.writerow({"id": "3", "front": "to eat", "back": "mangiare", "audio": "", "tags": "VERB"})
+        writer.writerow({"fo_word": "hello", "fo_sentence": "", "na_word": "ciao", "na_sentence": "", "na_note": "", "fo_sentence_audio": "", "fo_word_audio": "", "tags": "GREETING"})
+        writer.writerow({"fo_word": "cat", "fo_sentence": "The cat sleeps.", "na_word": "gatto", "na_sentence": "Il gatto dorme.", "na_note": "", "fo_sentence_audio": "", "fo_word_audio": "", "tags": "NOUN"})
+        writer.writerow({"fo_word": "to eat", "fo_sentence": "I eat bread.", "na_word": "mangiare", "na_sentence": "Mangio il pane.", "na_note": "", "fo_sentence_audio": "", "fo_word_audio": "", "tags": "VERB"})
 
     # --- .gitignore ---
     gitignore_path = os.path.join(output_dir, ".gitignore")

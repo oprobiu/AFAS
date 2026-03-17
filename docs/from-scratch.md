@@ -33,27 +33,30 @@ The structure looks like this:
   "tools_repo": "oprobiu/AFAS",
   "tools_version": "v1.0.0",
   "fields": [
-    {"name": "ID", "csv": "id"},
-    {"name": "Front", "csv": "front"},
-    {"name": "Back", "csv": "back"},
-    {"name": "Audio", "csv": "audio"}
+    {"name": "fo_word", "csv": "fo_word"},
+    {"name": "fo_sentence", "csv": "fo_sentence"},
+    {"name": "na_word", "csv": "na_word"},
+    {"name": "na_sentence", "csv": "na_sentence"},
+    {"name": "na_note", "csv": "na_note"},
+    {"name": "fo_sentence_audio", "csv": "fo_sentence_audio"},
+    {"name": "fo_word_audio", "csv": "fo_word_audio"}
   ],
   "templates": [
     {
-      "name": "Forward",
-      "front": "{{Front}} {{Audio}}",
-      "back": "{{FrontSide}}\n<hr>\n{{Back}}"
+      "name": "FO→NA",
+      "front": "{{fo_word}} {{fo_word_audio}}\n{{#fo_sentence}}\n<br><br>\n<i>{{fo_sentence}}</i>\n{{/fo_sentence}}",
+      "back": "{{FrontSide}}\n<hr id=answer>\n{{na_word}}\n{{#na_sentence}}\n<br><br>\n<i>{{na_sentence}}</i>\n{{/na_sentence}}"
     },
     {
-      "name": "Reverse",
-      "front": "{{Back}}",
-      "back": "{{FrontSide}}\n<hr>\n{{Front}} {{Audio}}"
+      "name": "NA→FO",
+      "front": "{{na_word}}\n{{#na_sentence}}\n<br><br>\n<i>{{na_sentence}}</i>\n{{/na_sentence}}",
+      "back": "{{FrontSide}}\n<hr id=answer>\n{{fo_word}} {{fo_word_audio}}\n{{#fo_sentence}}\n<br><br>\n<i>{{fo_sentence}}</i>\n{{/fo_sentence}}"
     }
   ]
 }
 ```
 
-`fields`: each entry has a `name` (shown in Anki) and `csv` (column name in notes.csv).
+`fields`: each entry has a `name` (shown in Anki) and `csv` (column name in notes.csv). `fo_` = foreign language, `na_` = native language.
 
 `templates`: use `{{FieldName}}` to reference fields. `{{FrontSide}}` shows the front on the back.
 
@@ -64,9 +67,9 @@ No audio? Leave out the audio field and templates that reference it. No reverse 
 Columns = the `csv` values from your fields + `tags`. Leave audio columns empty.
 
 ```csv
-id,front,back,audio,tags
-1,hello,ciao,,GREETING
-2,cat,gatto,,NOUN
+fo_word,fo_sentence,na_word,na_sentence,na_note,fo_sentence_audio,fo_word_audio,tags
+hello,,ciao,,,,GREETING
+cat,The cat sleeps.,gatto,Il gatto dorme.,,,,NOUN
 ```
 
 ## 4. (Optional) Add TTS audio
@@ -149,24 +152,24 @@ A deck with word + sentence fields, two templates, and TTS audio in 4 Italian vo
   "tools_repo": "oprobiu/AFAS",
   "tools_version": "v1.0.0",
   "fields": [
-    {"name": "ID", "csv": "id"},
-    {"name": "Word", "csv": "word"},
-    {"name": "Sentence", "csv": "sentence"},
-    {"name": "Translation", "csv": "translation"},
-    {"name": "Sentence Translation", "csv": "sentence_translation"},
-    {"name": "Word Audio", "csv": "word_audio"},
-    {"name": "Sentence Audio", "csv": "sentence_audio"}
+    {"name": "fo_word", "csv": "fo_word"},
+    {"name": "fo_sentence", "csv": "fo_sentence"},
+    {"name": "na_word", "csv": "na_word"},
+    {"name": "na_sentence", "csv": "na_sentence"},
+    {"name": "na_note", "csv": "na_note"},
+    {"name": "fo_sentence_audio", "csv": "fo_sentence_audio"},
+    {"name": "fo_word_audio", "csv": "fo_word_audio"}
   ],
   "templates": [
     {
-      "name": "IT to EN",
-      "front": "{{Word}} {{Word Audio}}\n{{#Sentence}}<br><br><i>{{Sentence}}</i>{{/Sentence}}\n{{Sentence Audio}}",
-      "back": "{{FrontSide}}\n<hr>\n{{Translation}}\n{{#Sentence Translation}}<br><br><i>{{Sentence Translation}}</i>{{/Sentence Translation}}"
+      "name": "FO→NA",
+      "front": "{{fo_word}} {{fo_word_audio}}\n{{#fo_sentence}}<br><br><i>{{fo_sentence}}</i>{{/fo_sentence}}",
+      "back": "{{FrontSide}}\n<hr>\n{{na_word}}\n{{#na_sentence}}<br><br><i>{{na_sentence}}</i>{{/na_sentence}}"
     },
     {
-      "name": "EN to IT",
-      "front": "{{Translation}}\n{{#Sentence Translation}}<br><br><i>{{Sentence Translation}}</i>{{/Sentence Translation}}",
-      "back": "{{FrontSide}}\n<hr>\n{{Word}} {{Word Audio}}\n{{#Sentence}}<br><br><i>{{Sentence}}</i>{{/Sentence}}\n{{Sentence Audio}}"
+      "name": "NA→FO",
+      "front": "{{na_word}}\n{{#na_sentence}}<br><br><i>{{na_sentence}}</i>{{/na_sentence}}",
+      "back": "{{FrontSide}}\n<hr>\n{{fo_word}} {{fo_word_audio}}\n{{#fo_sentence}}<br><br><i>{{fo_sentence}}</i>{{/fo_sentence}}"
     }
   ],
   "tts": {
@@ -179,8 +182,8 @@ A deck with word + sentence fields, two templates, and TTS audio in 4 Italian vo
       "it-IT-GiuseppeMultilingualNeural"
     ],
     "targets": [
-      {"field": "word_audio", "source": "word", "prefix": "word"},
-      {"field": "sentence_audio", "source": "sentence", "prefix": "sent"}
+      {"field": "fo_word_audio", "source": "fo_word", "prefix": "word"},
+      {"field": "fo_sentence_audio", "source": "fo_sentence", "prefix": "sent"}
     ]
   }
 }
@@ -191,12 +194,12 @@ A deck with word + sentence fields, two templates, and TTS audio in 4 Italian vo
 <summary>notes.csv</summary>
 
 ```csv
-id,word,sentence,translation,sentence_translation,word_audio,sentence_audio,tags
-1,ciao,Ciao come stai?,hello,Hello how are you?,,,GREETING
-2,gatto,Il gatto dorme sul divano.,cat,The cat sleeps on the couch.,,,NOUN
-3,mangiare,Voglio mangiare una pizza.,to eat,I want to eat a pizza.,,,VERB
-4,bello,Che bel giorno!,beautiful,What a beautiful day!,,,ADJ
-5,casa,La mia casa è grande.,house,My house is big.,,,NOUN
+fo_word,fo_sentence,na_word,na_sentence,na_note,fo_sentence_audio,fo_word_audio,tags
+ciao,Ciao come stai?,hello,Hello how are you?,,,,GREETING
+gatto,Il gatto dorme sul divano.,cat,The cat sleeps on the couch.,,,,NOUN
+mangiare,Voglio mangiare una pizza.,to eat,I want to eat a pizza.,,,,VERB
+bello,Che bel giorno!,beautiful,What a beautiful day!,,,,ADJ
+casa,La mia casa è grande.,house,My house is big.,,,,NOUN
 ```
 </details>
 

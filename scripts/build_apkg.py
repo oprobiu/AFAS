@@ -102,16 +102,15 @@ def build(config_path, tools_dir):
 
     # Collect media — only files referenced by notes
     print(f"\n--- Collecting media from {media_dir}")
+    import re as _re
     referenced = set()
     for row in notes:
         for f in config["fields"]:
             val = row.get(f["csv"], "")
-            if "[sound:" in val:
-                referenced.add(val.replace("[sound:", "").replace("]", ""))
-            if "<img src=" in val:
-                import re as _re
-                for m in _re.findall(r'<img src="([^"]+)"', val):
-                    referenced.add(m)
+            for m in _re.findall(r'\[sound:([^\]]+)\]', val):
+                referenced.add(m)
+            for m in _re.findall(r'<img src="([^"]+)"', val):
+                referenced.add(m)
 
     all_media = set(os.listdir(media_dir)) if os.path.isdir(media_dir) else set()
     media_files = sorted(referenced & all_media)
