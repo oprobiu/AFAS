@@ -42,10 +42,31 @@ jobs:
       - name: Determine artifact name
         id: name
         run: |
-          DECK=$(python3 -c "import json; print(json.load(open('${{ inputs.deck-config }}'))['deck_name'].replace(' ','_'))")
-          echo "artifact=${DECK}.apkg" >> "$GITHUB_OUTPUT"
+          TAG="${GITHUB_REF#refs/tags/}"
+          python3 -c "
+          import json
+          cfg = json.load(open('${{ inputs.deck-config }}'))
+          deck = cfg['deck_name']
+          level = deck.split()[0] if deck[0].upper() in 'AB' else deck.replace(' ','_')
+          fo = cfg.get('tts',{}).get('language','xx').split('-')[0]
+          tag = '${TAG}'
+          na = tag.rsplit('-',1)[-1] if '-' in tag else 'xx'
+          print(f'artifact={level}-{fo}-{na}-{tag}.apkg')
+          " >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/${{ steps.name.outputs.artifact }}
+      - name: Rename artifact
+        run: |
+          SRC=$(ls build/*.apkg)
+          mv "$SRC" "build/${{ steps.name.outputs.artifact }}"
+
+      - name: Clean old assets and upload release
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          # Delete all existing assets from this release
+          gh release view "$TAG" --json assets -q '.assets[].name' 2>/dev/null | while read name; do
+            gh release delete-asset "$TAG" "$name" -y 2>/dev/null || true
+          done
+          # Upload new asset
+          gh release upload "$TAG" build/${{ steps.name.outputs.artifact }} --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
