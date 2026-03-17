@@ -59,9 +59,11 @@ jobs:
           SRC=$(ls build/*.apkg)
           mv "$SRC" "build/${{ steps.name.outputs.artifact }}"
 
-      - name: Clean old assets and upload release
+      - name: Create or update release
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
+          # Create release if it doesn't exist
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --generate-notes
           # Delete all existing assets from this release
           gh release view "$TAG" --json assets -q '.assets[].name' 2>/dev/null | while read name; do
             gh release delete-asset "$TAG" "$name" -y 2>/dev/null || true
