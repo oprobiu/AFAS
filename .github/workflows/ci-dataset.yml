@@ -1,0 +1,35 @@
+name: Validate dataset
+
+on:
+  workflow_call:
+    inputs:
+      deck-config:
+        required: false
+        type: string
+        default: 'data/deck.json'
+      tools-version:
+        required: true
+        type: string
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dataset repo
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.x' }
+
+      - name: Checkout AFAS tools
+        uses: actions/checkout@v4
+        with:
+          repository: oprobiu/AFAS
+          ref: ${{ inputs.tools-version }}
+          path: .tools/AFAS
+
+      - name: Install dependencies
+        run: pip install -r .tools/AFAS/requirements.txt
+
+      - name: Validate dataset
+        run: python3 .tools/AFAS/scripts/validate.py --config ${{ inputs.deck-config }} --tools-dir .tools/AFAS
