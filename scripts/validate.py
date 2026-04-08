@@ -116,11 +116,17 @@ def validate(config_path, tools_dir, clean_orphans=False):
                 if not ref:
                     missing_ref += 1
                     continue
-                fname = ref.replace("[sound:", "").replace("]", "")
-                if fname in media_on_disk:
+                fnames = re.findall(r'\[sound:([^\]]+)\]', ref)
+                if not fnames:
+                    missing_ref += 1
+                    continue
+                all_found = True
+                for fname in fnames:
+                    if fname not in media_on_disk:
+                        missing_file += 1
+                        all_found = False
+                if all_found:
                     ok += 1
-                else:
-                    missing_file += 1
 
             print(f"  {label} ({field}):")
             print(f"    OK:           {ok}")

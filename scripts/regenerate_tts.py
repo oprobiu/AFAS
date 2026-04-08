@@ -6,7 +6,11 @@ Reads tts config from deck.json:
   - tts.engine: "edge-tts" or "gtts"
   - tts.voices: list of voice names (edge-tts) or ignored (gtts)
   - tts.language: language code (used by gtts, e.g. "de")
-  - tts.targets: list of {field, source, prefix, strip_html, dialogue}
+  - tts.targets: list of {field, source, prefix, strip_html, dialogue, split_on}
+    - split_on: optional CSS class name (e.g. "sent-sep"). When set, splits the
+      source field on <hr class="CLASS"> boundaries, generates one audio file per
+      segment with numbered prefixes (s1, s2, ...), and writes multiple [sound:]
+      refs into the target field.
 
 If no "tts" key in config, exits cleanly (deck has no audio).
 
@@ -118,8 +122,78 @@ async def generate_dialogue(text, dialogue_cfg, voices, path, engine="edge-tts",
                 os.remove(t)
 
 
+async def process_target_split(target, notes, voices, media_dir, args, engine="edge-tts", language="de"):
+    """Process a TTS target that splits source on an HR class boundary."""
+    field = target["field"]
+    source = target["source"]
+    split_on = target["split_on"]
+    dialogue_cfg = target.get("dialogue")
+
+    split_re = re.compile(
+        r"<br>\s*<hr\s+class=[\"']" + re.escape(split_on) + r"[\"']\s*/?>\s*<br>",
+        re.IGNORECASE,
+    )
+
+    print(f"--- Target: {field} (source: {source}, split_on: {split_on})")
+    gen = skip = empty = clear = 0
+    total = len(notes)
+
+    for i, row in enumerate(notes):
+        raw_text = strip_sound_refs(row.get(source, ""))
+        if not strip_html(raw_text).strip():
+            if row.get(field, "").strip():
+                if not args.dry_run:
+                    row[field] = ""
+                clear += 1
+            empty += 1
+            continue
+
+        segments = split_re.split(raw_text)
+        voice = voices[i % len(voices)] if voices else "default"
+        sound_refs = []
+
+        for si, seg in enumerate(segments):
+            text = strip_html(seg).strip()
+            if not text:
+                continue
+            seg_prefix = f"s{si + 1}"
+            is_dlg = (dialogue_cfg and dialogue_cfg.get("enabled")
+                      and dialogue_cfg.get("female_marker", "") in text
+                      and dialogue_cfg.get("male_marker", "") in text)
+
+            if is_dlg:
+                filename = make_dialogue_filename(seg_prefix, text, engine)
+            else:
+                filename = make_filename(seg_prefix, text, voice, engine)
+
+            path = os.path.join(media_dir, filename)
+            sound_refs.append(f"[sound:{filename}]")
+
+            if os.path.exists(path):
+                skip += 1
+            else:
+                label = "DIALOGUE" if is_dlg else (voice.split("-")[-1] if engine == "edge-tts" else "gTTS")
+                display = text[:55] + ("..." if len(text) > 55 else "")
+                print(f"  [{i+1}/{total}] {seg_prefix} {label}: {display}", flush=True)
+                if not args.dry_run:
+                    if is_dlg:
+                        await generate_dialogue(text, dialogue_cfg, voices, path, engine, language)
+                    else:
+                        await generate_audio(text, voice, path, engine, language)
+                gen += 1
+
+        if not args.dry_run:
+            row[field] = " ".join(sound_refs)
+
+    print(f"\n\n  Generated: {gen}  Skipped: {skip}  Empty: {empty}  Cleared: {clear}\n")
+    return gen
+
+
 async def process_target(target, notes, voices, media_dir, args, engine="edge-tts", language="de"):
     """Process one TTS target (e.g. sentence audio or word audio)."""
+    if target.get("split_on"):
+        return await process_target_split(target, notes, voices, media_dir, args, engine, language)
+
     field = target["field"]
     source = target["source"]
     prefix = target["prefix"]
@@ -208,7 +282,8 @@ async def run(args):
         print(f"    [{i}] {v}")
     print(f"  Targets: {len(targets)}")
     for t in targets:
-        print(f"    {t['field']} <- {t['source']} (prefix: {t['prefix']})")
+        extra = f", split_on: {t['split_on']}" if t.get("split_on") else ""
+        print(f"    {t['field']} <- {t['source']} (prefix: {t['prefix']}{extra})")
     if args.dry_run:
         print(f"  Mode:    DRY RUN")
     if args.limit:
@@ -241,9 +316,9 @@ async def run(args):
             for field in audio_fields:
                 ref = row.get(field, "").strip()
                 if ref:
-                    fname = ref.replace("[sound:", "").replace("]", "")
-                    if not os.path.exists(os.path.join(media_dir, fname)):
-                        missing += 1
+                    for fname in re.findall(r"\[sound:([^\]]+)\]", ref):
+                        if not os.path.exists(os.path.join(media_dir, fname)):
+                            missing += 1
         if missing:
             print(f"  ERROR: {missing} files missing!")
         else:
