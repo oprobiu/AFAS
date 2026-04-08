@@ -123,16 +123,20 @@ async def generate_dialogue(text, dialogue_cfg, voices, path, engine="edge-tts",
 
 
 async def process_target_split(target, notes, voices, media_dir, args, engine="edge-tts", language="de"):
-    """Process a TTS target that splits source on an HR class boundary."""
+    """Process a TTS target that splits source on an HR class boundary.
+
+    For multi-segment notes: writes s1 audio to the target field (auto-plays),
+    and inlines s2+ audio refs into the source field after each sentence
+    (renders as clickable buttons next to their sentences).
+    Single-segment notes: writes one ref to the target field (unchanged).
+    """
     field = target["field"]
     source = target["source"]
     split_on = target["split_on"]
     dialogue_cfg = target.get("dialogue")
 
-    split_re = re.compile(
-        r"<br>\s*<hr\s+class=[\"']" + re.escape(split_on) + r"[\"']\s*/?>\s*<br>",
-        re.IGNORECASE,
-    )
+    sep_pattern = r"<br>\s*<hr\s+class=[\"']" + re.escape(split_on) + r"[\"']\s*/?>\s*<br>"
+    split_re = re.compile(sep_pattern, re.IGNORECASE)
 
     print(f"--- Target: {field} (source: {source}, split_on: {split_on})")
     gen = skip = empty = clear = 0
@@ -149,12 +153,14 @@ async def process_target_split(target, notes, voices, media_dir, args, engine="e
             continue
 
         segments = split_re.split(raw_text)
+        separators = re.findall(sep_pattern, raw_text, re.IGNORECASE)
         voice = voices[i % len(voices)] if voices else "default"
-        sound_refs = []
+        seg_filenames = []
 
         for si, seg in enumerate(segments):
             text = strip_html(seg).strip()
             if not text:
+                seg_filenames.append(None)
                 continue
             seg_prefix = f"s{si + 1}"
             is_dlg = (dialogue_cfg and dialogue_cfg.get("enabled")
@@ -167,7 +173,7 @@ async def process_target_split(target, notes, voices, media_dir, args, engine="e
                 filename = make_filename(seg_prefix, text, voice, engine)
 
             path = os.path.join(media_dir, filename)
-            sound_refs.append(f"[sound:{filename}]")
+            seg_filenames.append(filename)
 
             if os.path.exists(path):
                 skip += 1
@@ -183,7 +189,22 @@ async def process_target_split(target, notes, voices, media_dir, args, engine="e
                 gen += 1
 
         if not args.dry_run:
-            row[field] = " ".join(sound_refs)
+            # Inline all audio into source field after each segment, clear target field
+            row[field] = ""
+            parts = split_re.split(raw_text)
+            rebuilt = []
+            for si, seg in enumerate(parts):
+                clean_seg = strip_sound_refs(seg).rstrip()
+                if si < len(seg_filenames) and seg_filenames[si]:
+                    clean_seg += f" [sound:{seg_filenames[si]}]"
+                rebuilt.append(clean_seg)
+            sep_list = separators if separators else []
+            new_source = ""
+            for si, part in enumerate(rebuilt):
+                new_source += part
+                if si < len(sep_list):
+                    new_source += sep_list[si]
+            row[source] = new_source
 
     print(f"\n\n  Generated: {gen}  Skipped: {skip}  Empty: {empty}  Cleared: {clear}\n")
     return gen

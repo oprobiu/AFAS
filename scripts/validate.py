@@ -105,18 +105,20 @@ def validate(config_path, tools_dir, clean_orphans=False):
             label = target.get("prefix", field)
 
             ok = missing_file = missing_ref = stale = 0
+            is_split = "split_on" in target
             for r in notes:
                 ref = r.get(field, "").strip()
-                source_text = re.sub(r"<[^>]+>", "", r.get(source, "")).strip()
+                source_val = r.get(source, "")
+                source_text = re.sub(r"<[^>]+>", "", source_val).strip()
 
                 if not source_text or source_text == "-":
                     if ref:
                         stale += 1
                     continue
-                if not ref:
-                    missing_ref += 1
-                    continue
+                # Collect refs from target field + inline refs in source field
                 fnames = re.findall(r'\[sound:([^\]]+)\]', ref)
+                if is_split:
+                    fnames += re.findall(r'\[sound:([^\]]+)\]', source_val)
                 if not fnames:
                     missing_ref += 1
                     continue
