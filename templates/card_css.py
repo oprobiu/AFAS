@@ -10,6 +10,14 @@ DEFAULT_CSS = """.card {
  color: black;
  background-color: white;
 }
+.sentence {
+ margin-top: 0.8em;
+ padding-top: 0.6em;
+ border-top: 1px solid #e0e0e0;
+ font-size: 0.9em;
+ color: #333;
+ font-style: italic;
+}
 .replay-button svg {
  width: 40px;
  height: 40px;
