@@ -272,13 +272,14 @@ async def run(args):
     start = time.time()
     config = load_config(args.config, getattr(args, 'tools_dir', None))
     root = config["_root"]
+    data_dir = config["_data_dir"]
 
     tts_cfg = config.get("tts")
     if not tts_cfg:
         print("No 'tts' config in deck.json. Nothing to generate.")
         return
 
-    notes_csv = os.path.join(root, "data", "notes.csv")
+    notes_csv = os.path.join(data_dir, "notes.csv")
     media_dir = os.path.join(root, "media_files")
     os.makedirs(media_dir, exist_ok=True)
 

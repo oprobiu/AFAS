@@ -26,8 +26,9 @@ def build(config_path, tools_dir):
     start = time.time()
     config = load_config(config_path, tools_dir)
     root = config["_root"]
+    data_dir = config["_data_dir"]
 
-    notes_csv = os.path.join(root, "data", "notes.csv")
+    notes_csv = os.path.join(data_dir, "notes.csv")
     media_dir = os.path.join(root, "media_files")
     build_dir = os.path.join(root, "build")
 

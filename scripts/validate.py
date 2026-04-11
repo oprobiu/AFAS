@@ -33,8 +33,9 @@ def collect_all_media_refs(notes, fields):
 def validate(config_path, tools_dir, clean_orphans=False):
     config = load_config(config_path, tools_dir)
     root = config["_root"]
+    data_dir = config["_data_dir"]
 
-    notes_csv = os.path.join(root, "data", "notes.csv")
+    notes_csv = os.path.join(data_dir, "notes.csv")
     media_dir = os.path.join(root, "media_files")
 
     print(f"")

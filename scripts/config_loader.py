@@ -13,8 +13,14 @@ def load_config(config_path, tools_dir=None):
     with open(config_path) as f:
         config = json.load(f)
 
+    # _data_dir = directory containing deck.json (and notes.csv)
+    config["_data_dir"] = os.path.dirname(os.path.abspath(config_path))
+
+    # _root = repo root: walk up from config until we find media_files/ or .git/
     root = os.path.dirname(os.path.abspath(config_path))
-    if root.endswith("data"):
+    for _ in range(5):  # max 5 levels up
+        if os.path.isdir(os.path.join(root, "media_files")) or os.path.isdir(os.path.join(root, ".git")):
+            break
         root = os.path.dirname(root)
     config["_root"] = root
 

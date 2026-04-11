@@ -3,10 +3,11 @@ name: Build and Release .apkg
 on:
   workflow_call:
     inputs:
-      deck-config:
+      deck-configs:
         required: false
         type: string
         default: 'data/deck.json'
+        description: 'Comma-separated list of deck.json paths (e.g. data/ro/deck.json,data/en/deck.json)'
       tools-version:
         required: true
         type: string
@@ -33,42 +34,42 @@ jobs:
       - name: Install dependencies
         run: pip install -r .tools/AFAS/requirements.txt
 
-      - name: Validate dataset
-        run: python3 .tools/AFAS/scripts/validate.py --config ${{ inputs.deck-config }} --tools-dir .tools/AFAS
-
-      - name: Build .apkg
-        run: python3 .tools/AFAS/scripts/build_apkg.py --config ${{ inputs.deck-config }} --tools-dir .tools/AFAS
-
-      - name: Determine artifact name
-        id: name
+      - name: Build all decks
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          python3 -c "
-          import json
-          cfg = json.load(open('${{ inputs.deck-config }}'))
-          deck = cfg['deck_name']
-          level = deck.split()[0] if deck[0].upper() in 'AB' else deck.replace(' ','_')
-          fo = cfg.get('tts',{}).get('language','xx').split('-')[0]
-          tag = '${TAG}'
-          na = tag.rsplit('-',1)[-1] if '-' in tag else 'xx'
-          print(f'artifact={level}-{fo}-{na}-{tag}.apkg')
-          " >> "$GITHUB_OUTPUT"
+          IFS=',' read -ra CONFIGS <<< "${{ inputs.deck-configs }}"
+          for cfg in "${CONFIGS[@]}"; do
+            cfg=$(echo "$cfg" | xargs)
+            echo "=== Validating $cfg ==="
+            python3 .tools/AFAS/scripts/validate.py --config "$cfg" --tools-dir .tools/AFAS
 
-      - name: Rename artifact
-        run: |
-          SRC=$(ls build/*.apkg)
-          mv "$SRC" "build/${{ steps.name.outputs.artifact }}"
+            echo "=== Building $cfg ==="
+            python3 .tools/AFAS/scripts/build_apkg.py --config "$cfg" --tools-dir .tools/AFAS
+
+            # Rename: <level>-<na>-<fo>-<tag>.apkg  (e.g. A1-ro-de-v1.1.0.apkg)
+            SRC=$(ls -t build/*.apkg | head -1)
+            NAME=$(python3 -c "
+          import json, os
+          cfg = json.load(open('$cfg'))
+          level = cfg['deck_name'].split()[0]
+          fo = cfg.get('tts',{}).get('language','xx').split('-')[0]
+          na = os.path.basename(os.path.dirname(os.path.abspath('$cfg')))
+          if na == 'data': na = 'xx'
+          print(f'{level}-{na}-{fo}-${TAG}')
+          ")
+            mv "$SRC" "build/${NAME}.apkg"
+            echo "  → build/${NAME}.apkg"
+          done
 
       - name: Create or update release
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          # Create release if it doesn't exist
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --generate-notes
-          # Delete all existing assets from this release
           gh release view "$TAG" --json assets -q '.assets[].name' 2>/dev/null | while read name; do
             gh release delete-asset "$TAG" "$name" -y 2>/dev/null || true
           done
-          # Upload new asset
-          gh release upload "$TAG" build/${{ steps.name.outputs.artifact }} --clobber
+          for f in build/*.apkg; do
+            gh release upload "$TAG" "$f" --clobber
+          done
         env:
           GH_TOKEN: ${{ github.token }}
