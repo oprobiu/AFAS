@@ -15,7 +15,6 @@ DEFAULT_CSS = """.card {
  padding-top: 0.6em;
  border-top: 1px solid #e0e0e0;
  font-size: 0.9em;
- color: #333;
  font-style: italic;
 }
 .replay-button svg {
